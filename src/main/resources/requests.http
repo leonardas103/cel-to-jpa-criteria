@@ -1,0 +1,15 @@
+### Filter users with age > 25 and name == 'Alice'
+POST http://localhost:8080/api/users/filter
+Content-Type: application/json
+
+{
+  "expression": "age > 25 && name == 'Alice'"
+}
+
+### Filter users with age > 30
+POST http://localhost:8080/api/users/filter
+Content-Type: application/json
+
+{
+  "expression": "age > 30"
+}
