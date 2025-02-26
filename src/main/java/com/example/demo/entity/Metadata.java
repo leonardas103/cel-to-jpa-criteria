@@ -1,9 +1,15 @@
 package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "metadata")
 public class Metadata {
@@ -31,32 +37,4 @@ public class Metadata {
         this.datavalue = datavalue;
     }
 
-    // Getters and setters
-    public Long getId() {
-        return id;
-    }
-
-    public Content getContent() {
-        return content;
-    }
-
-    public String getDatakey() {
-        return datakey;
-    }
-
-    public String getDatavalue() {
-        return datavalue;
-    }
-
-    public void setContent(Content content) {
-        this.content = content;
-    }
-
-    public void setDatakey(String datakey) {
-        this.datakey = datakey;
-    }
-
-    public void setDatavalue(String datavalue) {
-        this.datavalue = datavalue;
-    }
 }

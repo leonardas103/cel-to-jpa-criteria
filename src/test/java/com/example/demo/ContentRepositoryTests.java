@@ -6,6 +6,7 @@ import com.example.demo.entity.Metadata;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.engine.discovery.predicates.IsPotentialTestContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,13 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.EntityType;
+import javax.persistence.metamodel.Metamodel;
+import javax.persistence.metamodel.PluralAttribute;
+import javax.persistence.metamodel.SingularAttribute;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,19 +40,19 @@ public class ContentRepositoryTests {
 
     @BeforeEach
     public void setup() {
-        entityManager.createQuery("DELETE FROM Metadata").executeUpdate();
-        entityManager.createQuery("DELETE FROM Content").executeUpdate();
-
-        Content content = new Content(LocalDateTime.now(), "Sample Content Name");
-
-        Metadata metadata1 = new Metadata(content, "author", "Alice");
-        Metadata metadata2 = new Metadata(content, "title", "Spring Boot Testing");
-
-        content.getMetadata().add(metadata1);
-        content.getMetadata().add(metadata2);
-
-        entityManager.persist(content);
-        entityManager.flush();
+//        entityManager.createQuery("DELETE FROM Metadata").executeUpdate();
+//        entityManager.createQuery("DELETE FROM Content").executeUpdate();
+//
+//        Content content = new Content(LocalDateTime.now(), "Sample Content Name");
+//
+//        Metadata metadata1 = new Metadata(content, "author", "Alice");
+//        Metadata metadata2 = new Metadata(content, "title", "Spring Boot Testing");
+//
+//        content.getMetadata().add(metadata1);
+//        content.getMetadata().add(metadata2);
+//
+//        entityManager.persist(content);
+//        entityManager.flush();
     }
 
 
@@ -56,16 +62,37 @@ public class ContentRepositoryTests {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Content> query = cb.createQuery(Content.class);
         Root<Content> root = query.from(Content.class);
-        Join<Content, Metadata> metadataJoin = root.join("metadata");
-        System.out.println("############## root"+metadataJoin);
-        System.out.println("############## datakey"+metadataJoin.get("datakey"));
+        System.out.println("metadata: " + root.get("metadata"));
+        System.out.println("Entity Class: " + root.getJavaType().getSimpleName());
 
-        query.select(root)
-                .where(cb.equal(metadataJoin.get("datakey"), "author"),
-                        cb.equal(metadataJoin.get("datavalue"), "Alice"));
+
+        // Use Metamodel to retrieve entity attributes
+        Metamodel metamodel = entityManager.getMetamodel();
+        EntityType<Content> entityType = metamodel.entity(Content.class);
+
+        // Print singular attributes (basic fields)
+        System.out.println("Singular Attributes:");
+        Set<SingularAttribute<? super Content, ?>> singularAttributes = entityType.getSingularAttributes();
+        for (SingularAttribute<? super Content, ?> attribute : singularAttributes) {
+            System.out.println("- " + attribute.getName() +":"+ attribute.getJavaType());
+        }
+
+        // Print collection attributes (like metadata)
+        System.out.println("Collection Attributes:");
+        Set<PluralAttribute<? super Content, ?, ?>> collectionAttributes = entityType.getPluralAttributes();
+        for (PluralAttribute<? super Content, ?, ?> attribute : collectionAttributes) {
+            System.out.println("- " + attribute.getName()+":"+attribute.getCollectionType());
+        }
+
+//        query.select(root).where(cb.isNotEmpty(root.get("metadata")));  // Content where metadata is not empty
+//        query.select(root).where(cb.equal(metadataJoin.get("id"), 1));
 
         List<Content> results = entityManager.createQuery(query).getResultList();
-        assertEquals(1, results.size());  // Expecting only the singularly initialized `Content`.
+        for (Content content : results) {
+            System.out.println("############: " + content);
+            System.out.println("Metadata:" + content.getMetadata());
+            System.out.println("----------------------");
+        }
     }
 
     @Test

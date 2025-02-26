@@ -1,12 +1,18 @@
 package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@ToString
 @Entity
 @Table(name = "content")
 public class Content {
@@ -23,33 +29,13 @@ public class Content {
 
     @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
+    @ToString.Exclude
     private List<Metadata> metadata = new ArrayList<>();
 
-    // Constructors
     public Content() {}
 
     public Content(LocalDateTime createdAt, String name) {
         this.createdAt = createdAt;
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public List<Metadata> getMetadata() {
-        return metadata;
-    }
-
-    public void setName(String name) {
         this.name = name;
     }
 }
